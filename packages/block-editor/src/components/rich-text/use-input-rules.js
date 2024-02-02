@@ -3,8 +3,17 @@
  */
 import { useRef } from '@wordpress/element';
 import { useRefEffect } from '@wordpress/compose';
-import { insert, isCollapsed, toHTMLString } from '@wordpress/rich-text';
-import { getBlockTransforms, findTransform } from '@wordpress/blocks';
+import {
+	insert,
+	remove,
+	isCollapsed,
+	toHTMLString,
+} from '@wordpress/rich-text';
+import {
+	getBlockType,
+	getBlockTransforms,
+	findTransform,
+} from '@wordpress/blocks';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -21,30 +30,21 @@ function findSelection( blocks ) {
 	let i = blocks.length;
 
 	while ( i-- ) {
-		const attributeKey = retrieveSelectedAttribute(
-			blocks[ i ].attributes
-		);
+		const block = blocks[ i ];
+		const attributeKey = retrieveSelectedAttribute( block.attributes );
 
 		if ( attributeKey ) {
-			blocks[ i ].attributes[ attributeKey ] = blocks[ i ].attributes[
-				attributeKey
-			]
-				// To do: refactor this to use rich text's selection instead, so
-				// we no longer have to use on this hack inserting a special
-				// character.
-				.toString()
-				.replace( START_OF_SELECTED_AREA, '' );
-			return [ blocks[ i ].clientId, attributeKey, 0, 0 ];
+			return [ block, attributeKey ];
 		}
 
-		const nestedSelection = findSelection( blocks[ i ].innerBlocks );
+		const nestedSelection = findSelection( block.innerBlocks );
 
 		if ( nestedSelection ) {
 			return nestedSelection;
 		}
 	}
 
-	return [];
+	return null;
 }
 
 /**
@@ -75,6 +75,16 @@ function replacePrecedingSpaces( value ) {
 	return value;
 }
 
+function* getBlockNames( block ) {
+	yield block.name;
+	if ( ! block.innerBlocks ) {
+		return;
+	}
+	for ( const innerBlock of block.innerBlocks ) {
+		yield* getBlockNames( innerBlock );
+	}
+}
+
 export function useInputRules( props ) {
 	const {
 		__unstableMarkLastChangeAsPersistent,
@@ -83,8 +93,9 @@ export function useInputRules( props ) {
 	const propsRef = useRef( props );
 	propsRef.current = props;
 	return useRefEffect( ( element ) => {
-		function inputRule() {
-			const { getValue, onReplace, selectionChange } = propsRef.current;
+		async function inputRule() {
+			const { getValue, onChange, onReplace, selectionChange } =
+				propsRef.current;
 
 			if ( ! onReplace ) {
 				return;
@@ -107,28 +118,48 @@ export function useInputRules( props ) {
 			);
 			const transformation = findTransform(
 				prefixTransforms,
-				( { prefix } ) => {
-					return trimmedTextBefore === prefix;
-				}
+				( { prefix } ) => trimmedTextBefore === prefix
 			);
 
 			if ( ! transformation ) {
 				return;
 			}
 
-			const content = toHTMLString( {
-				value: insert( value, START_OF_SELECTED_AREA, 0, start ),
-			} );
-			const block = transformation.transform( content );
+			onChange( remove( value, 0, start ) );
+			const block = transformation.transform( START_OF_SELECTED_AREA );
+			for ( const blockName of getBlockNames( block ) ) {
+				const blockType = getBlockType( blockName );
+				if ( blockType.lazyEdit ) {
+					await blockType.lazyEdit();
+				}
+			}
 
-			selectionChange( ...findSelection( [ block ] ) );
+			const selection = findSelection( [ block ] );
+			if ( selection ) {
+				const [ selectedBlock, selectedAttribute ] = selection;
+				const valueNow = getValue();
+				const valueStr = toHTMLString( { value: valueNow } );
+				// To do: refactor this to use rich text's selection instead, so
+				// we no longer have to use on this hack inserting a special
+				// character.
+				selectedBlock.attributes[ selectedAttribute ] =
+					selectedBlock.attributes[ selectedAttribute ]
+						.toString()
+						.replace( START_OF_SELECTED_AREA, valueStr );
+				selectionChange(
+					selectedBlock.clientId,
+					selectedAttribute,
+					0,
+					0
+				);
+			}
 			onReplace( [ block ] );
 			__unstableMarkAutomaticChange();
 
 			return true;
 		}
 
-		function onInput( event ) {
+		async function onInput( event ) {
 			const { inputType, type } = event;
 			const {
 				getValue,
@@ -142,7 +173,10 @@ export function useInputRules( props ) {
 				return;
 			}
 
-			if ( __unstableAllowPrefixTransformations && inputRule() ) {
+			if (
+				__unstableAllowPrefixTransformations &&
+				( await inputRule() )
+			) {
 				return;
 			}
 
