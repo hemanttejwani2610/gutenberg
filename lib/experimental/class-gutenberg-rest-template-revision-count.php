@@ -97,7 +97,7 @@ class Gutenberg_REST_Template_Revision_Count extends WP_REST_Templates_Controlle
 
 		return true;
 	}
-	
+
 	/**
 	 * Checks if a given request has access to read templates.
 	 *
