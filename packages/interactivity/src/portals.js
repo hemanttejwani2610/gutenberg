@@ -29,14 +29,19 @@ function Portal( props ) {
 		_this._container = null;
 	};
 
-	// When we change container we should clear our old container and
-	// indicate a new mount.
+	/*
+	 * When the container changes, it should clear the old container and
+	 * indicate a new mount.
+	 */
 	if ( _this._container && _this._container !== container ) {
 		_this.componentWillUnmount();
 	}
 
-	// When props.vnode is undefined/false/null we are dealing with some kind of
-	// conditional vnode. This should not trigger a render.
+	/*
+	 * When props.vnode is undefined/false/null, there is some kind of
+	 * conditional vnode. This should not trigger a render.
+	 */
+
 	if ( props._vnode ) {
 		if ( ! _this._temp ) {
 			_this._container = container;
@@ -74,10 +79,11 @@ function Portal( props ) {
 			),
 			_this._temp
 		);
-	}
-	// When we come from a conditional render, on a mounted
-	// portal we should clear the DOM.
-	else if ( _this._temp ) {
+	} else if ( _this._temp ) {
+		/*
+		 * If it is a conditional render, on a mounted
+		 * portal, the DOM should be cleared.
+		 */
 		_this.componentWillUnmount();
 	}
 }
