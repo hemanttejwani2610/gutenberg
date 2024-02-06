@@ -10,9 +10,9 @@ import {
 	toHTMLString,
 } from '@wordpress/rich-text';
 import {
-	getBlockType,
 	getBlockTransforms,
 	findTransform,
+	lazyLoadBlock,
 } from '@wordpress/blocks';
 import { useDispatch } from '@wordpress/data';
 
@@ -75,16 +75,6 @@ function replacePrecedingSpaces( value ) {
 	return value;
 }
 
-function* getBlockNames( block ) {
-	yield block.name;
-	if ( ! block.innerBlocks ) {
-		return;
-	}
-	for ( const innerBlock of block.innerBlocks ) {
-		yield* getBlockNames( innerBlock );
-	}
-}
-
 export function useInputRules( props ) {
 	const {
 		__unstableMarkLastChangeAsPersistent,
@@ -127,12 +117,7 @@ export function useInputRules( props ) {
 
 			onChange( remove( value, 0, start ) );
 			const block = transformation.transform( START_OF_SELECTED_AREA );
-			for ( const blockName of getBlockNames( block ) ) {
-				const blockType = getBlockType( blockName );
-				if ( blockType.lazyEdit ) {
-					await blockType.lazyEdit();
-				}
-			}
+			await lazyLoadBlock( block );
 
 			const selection = findSelection( [ block ] );
 			if ( selection ) {
