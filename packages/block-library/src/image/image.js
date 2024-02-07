@@ -425,15 +425,15 @@ export default function Image( {
 				lockUrlControls:
 					!! urlBinding &&
 					getBlockBindingsSource( urlBinding?.source )
-						?.lockAttributesEditing === true,
+						?.lockAttributesEditing !== false,
 				lockAltControls:
 					!! altBinding &&
 					getBlockBindingsSource( altBinding?.source )
-						?.lockAttributesEditing === true,
+						?.lockAttributesEditing !== false,
 				lockTitleControls:
 					!! titleBinding &&
 					getBlockBindingsSource( titleBinding?.source )
-						?.lockAttributesEditing === true,
+						?.lockAttributesEditing !== false,
 			};
 		},
 		[ isSingleSelected ]
