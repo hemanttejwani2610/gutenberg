@@ -23,7 +23,14 @@ export function ShadowPopoverContainer( { shadow, onShadowChange, settings } ) {
 	const themeShadows = settings?.shadow?.presets?.theme;
 	const defaultPresetsEnabled = settings?.shadow?.defaultPresets;
 
+	const unsetShadow = {
+		name: __( 'Unset' ),
+		slug: 'unset',
+		shadow: 'none',
+	};
+
 	const shadows = [
+		unsetShadow,
 		...( defaultPresetsEnabled ? defaultShadows : [] ),
 		...( themeShadows || [] ),
 	];
@@ -50,6 +57,7 @@ export function ShadowPresets( { presets, activeShadow, onSelect } ) {
 					key={ slug }
 					label={ name }
 					isActive={ shadow === activeShadow }
+					type={ slug === 'unset' ? 'unset' : 'preset' }
 					onSelect={ () =>
 						onSelect( shadow === activeShadow ? undefined : shadow )
 					}
@@ -60,11 +68,13 @@ export function ShadowPresets( { presets, activeShadow, onSelect } ) {
 	);
 }
 
-export function ShadowIndicator( { label, isActive, onSelect, shadow } ) {
+export function ShadowIndicator( { type, label, isActive, onSelect, shadow } ) {
 	return (
 		<div className="block-editor-global-styles__shadow-indicator-wrapper">
 			<Button
-				className="block-editor-global-styles__shadow-indicator"
+				className={ `block-editor-global-styles__shadow-indicator ${
+					type === 'unset' ? 'unset' : ''
+				}` }
 				onClick={ onSelect }
 				label={ label }
 				style={ { boxShadow: shadow } }

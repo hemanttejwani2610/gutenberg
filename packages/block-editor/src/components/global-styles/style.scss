@@ -41,6 +41,10 @@
 	width: $button-size-small;
 }
 
+.block-editor-global-styles__shadow-indicator.unset {
+	background: linear-gradient(-45deg, transparent 48%, $gray-300 48%, $gray-300 52%, transparent 52%);
+}
+
 .block-editor-global-styles-advanced-panel__custom-css-input textarea {
 	font-family: $editor_html_font;
 	// CSS input is always LTR regardless of language.
