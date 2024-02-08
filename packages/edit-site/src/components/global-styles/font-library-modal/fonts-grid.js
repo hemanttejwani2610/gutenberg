@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-
 import { __experimentalVStack as VStack } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 
