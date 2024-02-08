@@ -123,7 +123,7 @@ function InstalledFonts() {
 					) }
 					{ baseCustomFonts.length > 0 && (
 						<>
-							<FontsGrid>
+							<FontsGrid title={ __( 'User Fonts' ) }>
 								{ baseCustomFonts.map( ( font ) => (
 									<LibraryFontCard
 										font={ font }

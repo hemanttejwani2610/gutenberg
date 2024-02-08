@@ -1,11 +1,7 @@
 /**
  * WordPress dependencies
  */
-import {
-	__experimentalVStack as VStack,
-	__experimentalText as Text,
-	__experimentalSpacer as Spacer,
-} from '@wordpress/components';
+import { __experimentalVStack as VStack } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 
 function FontsGrid( { title, children, pageSize = 32 } ) {
@@ -29,30 +25,26 @@ function FontsGrid( { title, children, pageSize = 32 } ) {
 	}, [ lastItem ] );
 
 	return (
-		<div className="font-library-modal__fonts-grid">
-			<VStack spacing={ 0 }>
-				{ title && (
-					<>
-						<Text className="font-library-modal__subtitle">
-							{ title }
-						</Text>
-						<Spacer margin={ 2 } />
-					</>
-				) }
-				<div className="font-library-modal__fonts-grid__main">
-					{ items.map( ( child, i ) => {
-						if ( i === itemsLimit - 1 ) {
-							return (
-								<div key={ child.key } ref={ setLastItem }>
-									{ child }
-								</div>
-							);
-						}
-						return <div key={ child.key }>{ child }</div>;
-					} ) }
-				</div>
-			</VStack>
-		</div>
+		<VStack className="font-library-modal__fonts-grid" as="fieldset">
+			{ title && (
+				<legend className="font-library-modal__fonts-grid-legend">
+					<h2 className="font-library-modal__fonts-grid-title">
+						{ title }
+					</h2>
+				</legend>
+			) }
+			<ul className="font-library-modal__fonts-grid__list">
+				{ items.map( ( child, i ) => (
+					<li
+						className="font-library-modal__fonts-grid__list-item"
+						key={ child.key }
+						ref={ i === itemsLimit - 1 ? setLastItem : undefined }
+					>
+						{ child }
+					</li>
+				) ) }
+			</ul>
+		</VStack>
 	);
 }
 
