@@ -1,6 +1,7 @@
 /**
  * WordPress dependencies
  */
+
 import { __experimentalVStack as VStack } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 
@@ -25,13 +26,11 @@ function FontsGrid( { title, children, pageSize = 32 } ) {
 	}, [ lastItem ] );
 
 	return (
-		<VStack className="font-library-modal__fonts-grid" as="fieldset">
+		<VStack className="font-library-modal__fonts-grid">
 			{ title && (
-				<legend className="font-library-modal__fonts-grid-legend">
-					<h2 className="font-library-modal__fonts-grid-title">
-						{ title }
-					</h2>
-				</legend>
+				<h2 className="font-library-modal__fonts-grid-title">
+					{ title }
+				</h2>
 			) }
 			<ul className="font-library-modal__fonts-grid__list">
 				{ items.map( ( child, i ) => (
