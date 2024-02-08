@@ -31,7 +31,12 @@ function FontsGrid( { title, children, pageSize = 32 } ) {
 					{ title }
 				</h2>
 			) }
-			<ul className="font-library-modal__fonts-grid__list">
+			{ /*
+			 * Disable reason: The `list` ARIA role is redundant but
+			 * Safari+VoiceOver won't announce the list otherwise.
+			 */
+			/* eslint-disable jsx-a11y/no-redundant-roles */ }
+			<ul role="list" className="font-library-modal__fonts-grid__list">
 				{ items.map( ( child, i ) => (
 					<li
 						className="font-library-modal__fonts-grid__list-item"
@@ -42,6 +47,7 @@ function FontsGrid( { title, children, pageSize = 32 } ) {
 					</li>
 				) ) }
 			</ul>
+			{ /* eslint-enable jsx-a11y/no-redundant-roles */ }
 		</VStack>
 	);
 }
