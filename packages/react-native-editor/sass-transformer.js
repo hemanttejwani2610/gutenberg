@@ -98,6 +98,7 @@ function transform( src, filename, options ) {
 		const result = sass.renderSync( {
 			data: src,
 			includePaths: [
+				path.resolve( process.cwd(), '../', path.dirname( filename ) ),
 				path.dirname( filename ),
 				...autoImportIncludePaths,
 			],
